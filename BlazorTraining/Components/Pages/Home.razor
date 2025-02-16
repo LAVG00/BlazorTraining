@@ -1,58 +1,47 @@
 ﻿@page "/"
 @using Models
+@using Clients
 
 <PageTitle>Game Catalog</PageTitle>
 
-<table class="table table-striped table-bordered table-hover mt-3">
-	<thead class="table-dark">
-		<tr>
-			<th>Id</th>
-			<th>Name</th>
-			<th>Genre</th>
-			<th class="text-end">Price</th>
-			<th>Release Date</th>
-			<th></th>
-		</tr>
-	</thead>
-
-	<tbody>
-		@foreach (var game in games){
+@if(games is null){
+	<p><em>Loading</em></p>
+} else {
+	<table class="table table-striped table-bordered table-hover mt-3">
+		<thead class="table-dark">
 			<tr>
-				<td>@game.Id</td>
-				<td>@game.Name</td>
-				<td>@game.Genre</td>
-				<td class="text-end">@game.Price.ToString("C2")</td>
-				<td>@game.ReleaseDate</td>
-				<td></td>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Genre</th>
+				<th class="text-end">Price</th>
+				<th>Release Date</th>
+				<th></th>
 			</tr>
-		}
-	</tbody>
-</table>
+		</thead>
+
+		<tbody>
+			@foreach (var game in games){
+				<tr>
+					<td>@game.Id</td>
+					<td>@game.Name</td>
+					<td>@game.Genre</td>
+					<td class="text-end">@game.Price.ToString("C2")</td>
+					<td>@game.ReleaseDate</td>
+					<td></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
 
 @code {
-	private GameSummary[] games = [
-	new(){
-		Id = 1,
-		Name ="Dark souls",
-		Genre = "RPG",
-		Price = 549.00M,
-		ReleaseDate = new DateOnly(2011, 9, 22)
-	}, 
-	new(){
-		Id = 2,
-		Name = "Pokemon Platinum",
-		Genre = "RPG",
-		Price = 800.00M,
-		ReleaseDate = new DateOnly(2008, 9, 13)
-	},
-	new(){
-		Id= 3,
-		Name = "Monster Hunter Rise",
-		Genre = "ARPG",
-		Price = 490.00M,
-		ReleaseDate = new DateOnly(2021, 3, 26)
+	private GamesClient client = new();
+	private GameSummary[]? games;
+
+	protected override void OnInitialized()
+	{
+		games = client.GetGames();
 	}
-			];
 }
 
 
