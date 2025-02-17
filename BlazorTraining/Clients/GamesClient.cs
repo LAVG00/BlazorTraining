@@ -4,7 +4,7 @@ namespace BlazorTraining.Clients
 {
     public class GamesClient
     {
-        private readonly GameSummary[] games = [
+        private readonly List<GameSummary> games = [
             new(){
                 Id = 1,
                 Name ="Dark souls",
@@ -28,6 +28,24 @@ namespace BlazorTraining.Clients
             }
         ];
 
+        private readonly Genre[] genres = new GenresClient().GetGenres();
+
         public GameSummary[] GetGames() => [.. games];
+
+        public void AddGame(GameDetails game)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(game.GenreId);
+            var genre = genres.Single(genre => genre.Id == int.Parse(game.GenreId));
+            var gameSummary = new GameSummary
+            {
+                Id = games.Count() + 1,
+                Name = game.Name,
+                Genre = game.GenreId,
+                Price = game.Price,
+                ReleaseDate = game.ReleaseDate,
+            };
+
+            games.Add(gameSummary);
+        }
     }
 }
