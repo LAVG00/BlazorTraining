@@ -1,20 +1,25 @@
 ﻿@page "/editgame"
+@page "/editgame/{id:int}"
+
 @inject NavigationManager NavigationManager
 @inject GamesClient GamesClient
 @inject GenresClient GenresClient
 
-<PageTitle>New Game</PageTitle>
-<h3>New Game</h3>
+<PageTitle>@title</PageTitle>
+<h3>@title</h3>
 
-@if (genres is null){
+@if (genres is null || game is null){
     <p><em>Loading</em></p>
 } else {
     <div class="row">
         <div class="col-md-4">
-            <EditForm Model="@game" FormName="editGame" OnSubmit="HandleSubmit">
+            <EditForm Model="@game" FormName="editGame" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator/>
+                <!-- <ValidationSummary/> -->
                 <div class="mb-3">
                     <label for="name" class="form-label">Name:</label>
                     <InputText id="name" class="form-control" @bind-value="game.Name" />
+                    <ValidationMessage For="()=>game.Name"/>
                 </div>
                 <div class="mb-3">
                     <label for="genre" class="form-label">Genre:</label>
@@ -24,10 +29,12 @@
                             <option value="@genre.Id">@genre.Name</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="()=>game.GenreId"  />
                 </div>
                 <div class="mb-3">
                     <label for="price" class="form-label">Price:</label>
                     <InputNumber id="price" class="form-control" @bind-value="game.Price" />
+                    <ValidationMessage For="()=>game.Price" />
                 </div>
                 <div class="mb-3">
                     <label for="releaseDate" class="form-label">Release Date:</label>
@@ -41,14 +48,34 @@
 }
 
 @code {
+    [Parameter]
+    public int? Id { get; set; }
+
+
     [SupplyParameterFromForm]
-    private GameDetails game { get; set; } = new()
-	{
-		Name = string.Empty,
-		ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow)
-	};
+    private GameDetails? game { get; set; }
 
     private Genre[]? genres;
+    private string title = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if(game is not null){
+            return;
+        }
+
+        if(Id is not null){
+            game = GamesClient.GetGame(Id.Value);
+            title = $"Edit {game.Name}";
+        } else {
+            game = new()
+                {
+                    Name = string.Empty,
+                    ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow)
+                };
+            title = "New Game";
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -56,7 +83,15 @@
     }
 
     private void HandleSubmit(){
-        GamesClient.AddGame(game);
+        ArgumentNullException.ThrowIfNull(game);
+
+        if(Id is null){
+            GamesClient.AddGame(game);
+        } else {
+            game.Id = Id.Value;
+            GamesClient.UpdateGame(game);
+        }
+        
         NavigationManager.NavigateTo("/");
     }
 }
