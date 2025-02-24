@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject GamesClient GamesClient
+@attribute [StreamRendering]
 
 <PageTitle>Game Catalog</PageTitle>
 
@@ -50,9 +51,9 @@
 @code {
 	private GameSummary[]? games;
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
-		games = GamesClient.GetGames();
+		games = await GamesClient.GetGamesAsync();
 	}
 
 	private static string GameUrl(int id) => $"/editgame/{id}";
