@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using BlazorTraining.Converters;
 
 namespace BlazorTraining.Models
 {
@@ -11,6 +13,7 @@ namespace BlazorTraining.Models
         public required string Name { get; set; }
 
         [Required(ErrorMessage = "The Genre field is required")]
+        [JsonConverter(typeof(StringConverter))]
         public string? GenreId { get; set; }
 
         [Range(1, 2000)]
